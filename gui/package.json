@@ -1,0 +1,27 @@
+{
+  "name": "openlogger",
+  "version": "1.0.0",
+  "description": "An open source application to communicate with electrical dataloggers.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": "git@github.com:mp035/softcomm.git",
+  "keywords": [
+    "SoftComm",
+    "SoftChart",
+    "data",
+    "logger",
+    "datalogger"
+  ],
+  "author": "Mark Pointing",
+  "license": "GPL v3",
+  "devDependencies": {
+    "electron": "^4.0.8"
+  },
+  "dependencies": {
+    "dygraphs": "^2.1.0",
+    "jquery": "^3.3.1",
+    "semantic-ui": "^2.4.2"
+  }
+}

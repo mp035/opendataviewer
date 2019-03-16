@@ -1,0 +1,5 @@
+
+.icon-comment:before { content: '\e800'; } /* '' */
+.icon-comment-empty:before { content: '\f0e5'; } /* '' */
+.icon-commenting:before { content: '\f27a'; } /* '' */
+.icon-commenting-o:before { content: '\f27b'; } /* '' */

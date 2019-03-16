@@ -5,8 +5,11 @@
     <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible" />
     <meta content="width=device-width, initial-scale=1, maximum-scale=2, user-scalable=no" name="viewport" />
     <meta content="#ffffff" name="theme-color" />
+    <meta http-equiv="X-UA-Compatible" content="IE=10; IE=9; IE=8; IE=7; IE=EDGE" />
     <title>OpenLogger</title>
-    <link href="./node_modules/semantic-ui/dist/semantic.css" rel="stylesheet" type="text/css" />
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.min.css" />
+    <link href="./css/fontello/assets/css/fontello.css" rel="stylesheet" type="text/css" />
     <link href="./css/main.css" rel="stylesheet" type="text/css" />
     <script>
         window.nodeRequire = require;
@@ -14,65 +17,86 @@
         delete window.exports;
         delete window.module;
     </script>
-    <script src="./node_modules/jquery/dist/jquery.js"></script>
-    <script src="./node_modules/semantic-ui/dist/semantic.js"></script>
+ 
+    <!-- Bootstrap Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script>
+        let $ = nodeRequire('jquery');
+        nodeRequire('bootstrap');
+        nodeRequire('floatthead');
+    </script>
+
     <link rel="stylesheet" type="text/css" href="./node_modules/dygraphs/dist/dygraph.css">
 </head>
 <body>
-    <!-- Position of toolbar (menu) is absolute. -->
-    <div id="div_m" class="ui compact menu">
-        <!--a href="#" class="item" ><b>OpenLogger</b></a-->
-        <div class="ui dropdown item" style="z-index:101;">
-            <i class="save icon"></i>
-            File
-            <i class="dropdown icon"></i>
-            <div class="menu">
-                <div class="item" id="menuFileOpen">Open</div>
-                <div class="item" data-value="2">Overlay Another Chart</div>
-                <div class="item" data-value="3">Save</div>
-                <div class="item" data-value="4">Save As</div>
-                <div class="item" data-value="5">Close</div>
-            </div>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light py-0 px-0">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item dropdown appmenu">
+                    <a class="nav-link dropdown-toggle py-0 icon-floppy" href="#" id="dropdownFileMenuButton" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        File
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="dropdownFileMenuButton">
+                        <a class="dropdown-item" id="menuFileOpen" href="#">Open</a>
+                        <a class="dropdown-item" href="#">Overlay Another Chart</a>
+                        <a class="dropdown-item" href="#">Save</a>
+                        <a class="dropdown-item" href="#">Save As</a>
+                        <a class="dropdown-item" href="#">Close</a>
+                    </div>
+                </li>
+                <li class="nav-item dropdown appmenu">
+                    <a class="nav-link dropdown-toggle py-0 icon-clock" href="#" id="dropdownPeriodMenuButton" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        View Period
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="dropdownPeriodMenuButton">
+                        <a class="dropdown-item view-period" href="#" data-value="4">4 hours</a>
+                        <a class="dropdown-item view-period" href="#" data-value="6">6 Hours</a>
+                        <a class="dropdown-item view-period" href="#" data-value="8">8 Hours</a>
+                        <a class="dropdown-item view-period" href="#" data-value="12">12 Hours</a>
+                        <a class="dropdown-item view-period" href="#" data-value="24">1 Day</a>
+                        <a class="dropdown-item view-period" href="#" data-value="168">1 Week</a>
+                    </div>             
+                </li> 
+                <li class="nav-item dropdown appmenu">
+                    <a class="nav-link dropdown-toggle py-0 icon-list" href="#" id="dropdownTableMenuButton" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Table View
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="dropdownTableMenuButton">
+                        <a class="dropdown-item view-period" href="#" data-value="4">All Readings</a>
+                        <a class="dropdown-item view-period" href="#" data-value="6">Max/Min</a>
+                        <a class="dropdown-item view-period" href="#" data-value="8">Hide Table</a>
+                    </div>          
+                </li> 
+                <li class="nav-item dropdown appmenu">
+                    <a class="nav-link dropdown-toggle py-0 icon-comment" href="#" id="dropdownCommentsMenuButton" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Comments
+                    </a>
+                    <div class="dropdown-menu px-1 py-1" aria-labelledby="dropdownCommentsMenuButton">
+                        <textarea class="form-control" rows="3" style="width:480px"></textarea>
+                    </div>          
+                </li> 
+                <li class="nav-item dropdown appmenu">
+                    <a class="nav-link dropdown-toggle py-0 icon-print" href="#" id="dropdownPrintMenuButton" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Print
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="dropdownTableMenuButton">
+                        <a class="dropdown-item view-period" href="#" data-value="4">Chart</a>
+                        <a class="dropdown-item view-period" href="#" data-value="6">Table</a>
+                    </div>          
+                </li> 
+                <li class="nav-item">
+                    <a class="nav-link appmenu icon-help-circled" href="#">Help</a>
+                </li>
+            </ul>
+
         </div>
-        <div class="ui dropdown item" style="z-index:101;">
-            <i class="clock icon"></i> View Period <i class="dropdown icon"></i>
-            <div class="menu">
-                <a class="item intervalSelector" data-value="4">4 hours</a>
-                <a class="item intervalSelector" data-value="6">6 Hours</a>
-                <a class="item intervalSelector" data-value="8">8 Hours</a>
-                <a class="item intervalSelector" data-value="12">12 Hours</a>
-                <a class="item intervalSelector" data-value="24">1 Day</a>
-                <a class="item intervalSelector" data-value="168">1 Week</a>
-            </div>
-        </div>
-        <div class="ui dropdown item" style="z-index:101;">
-            <i class="list icon"></i> Table View <i class="dropdown icon"></i>
-            <div class="menu">
-                <a class="item " data-value="1">All Readings</a>
-                <a class="item" data-value="2">Max/Min</a>
-                <a class="item" data-value="2">Hidden</a>
-            </div>
-        </div>
-        <div class="ui labeled icon dropdown item" style="z-index:101;">
-            <span class="text"><i class="comment icon"></span></i>Comments<i class="dropdown icon"></i>
-            <div class="menu">
-                <div class="ui input item">
-                <form>
-                    <textarea onclick="event.stopPropagation();" cols="80" rows="5" name="search" placeholder="Add Comments Here..."></textarea> 
-                </form>
-                </div>
-            </div>
-        </div>
-        <div class="ui dropdown item" style="z-index:101;">
-            <i class="print icon"></i> Print <i class="dropdown icon"></i>
-            <div class="menu">
-                <a class="item intervalSelector" data-value="chart">Chart</a>
-                <a class="item intervalSelector" data-value="table">Table</a>
-            </div>
-        </div>
-        <a href="#" class="ui labelled item" ><i class="icon question circle"></i>Help</a>
-        <div class="ui labelled icon item" ></div>
-    </div>
+    </nav>
+
+
 
     <!-- Position of graph is absolute. -->
     <div id="div_g" class="graphWrapper">
@@ -83,8 +107,8 @@
 
 
     <!-- Position of table is absolute. -->
-    <div id="div_t">
-        <table id="tableReadings" class="ui table striped">
+    <div id="div_t" class="wrapper">
+        <table id="tableReadings" class="table table-sm table-bordered">
             <thead>
                 <tr id="headTableReadings">
                     <th>Date/Time</th>
@@ -100,21 +124,22 @@
 
     <!-- Position footer is absolute. -->
     <div id="div_f">
-            <div class="ui divider"></div>
-            <footer>
-                Datalogger Interface Software written by Mark Pointing. &copy; 2018 FuturePoint Systems <a href="futurepoint.com.au">www.futurepoint.com.au</a>
-            </footer>
+        <div class="ui divider"></div>
+        <footer>
+            Datalogger Interface Software written by Mark Pointing. &copy; 2018 FuturePoint Systems <a href="futurepoint.com.au">www.futurepoint.com.au</a>
+        </footer>
     </div>
 
 
 
     </div>
     <script>
-        
+
         var Dygraph = nodeRequire('dygraphs');
-        nodeRequire("./node_modules/dygraphs/src/extras/synchronizer.js");
-        // You can also require other files to run in this process
-        nodeRequire('./renderer.js')
+//nodeRequire("./node_modules/dygraphs/src/extras/synchronizer.js");
+nodeRequire("./synchronizer.js"); // the original synchronizer is a bit broken. This one is fixed.
+// You can also require other files to run in this process
+nodeRequire('./renderer.js')
     </script>
 
 </body>

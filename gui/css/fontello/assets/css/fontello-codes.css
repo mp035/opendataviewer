@@ -1,5 +1,8 @@
 
 .icon-comment:before { content: '\e800'; } /* '' */
+.icon-print:before { content: '\e801'; } /* '' */
+.icon-floppy:before { content: '\e802'; } /* '' */
+.icon-clock:before { content: '\e803'; } /* '' */
+.icon-help-circled:before { content: '\e804'; } /* '' */
+.icon-list:before { content: '\e805'; } /* '' */
 .icon-comment-empty:before { content: '\f0e5'; } /* '' */
-.icon-commenting:before { content: '\f27a'; } /* '' */
-.icon-commenting-o:before { content: '\f27b'; } /* '' */

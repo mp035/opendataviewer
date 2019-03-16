@@ -71,13 +71,13 @@ ipcRenderer.on('setGraphOptionsMessage', (event, data) => {
 
 // trigger the file load operation
 document.getElementById('menuFileOpen').addEventListener('click', function(evt){
-    $(evt.target).closest('.ui.dropdown').dropdown('hide');
-    $(evt.target).dropdown('clear');
     ipcRenderer.send('openFileMessage');
 });
     
 ipcRenderer.on('loadDataMessage', (event, data) => {
-
+    document.getElementById('div_t').scrollTop = 0
+    var $table = $('#tableReadings');
+    $table.floatThead('destroy');
     var tableHead = document.getElementById("headTableReadings");
     var tableBody = document.getElementById("bodyTableReadings");
     while (tableHead.firstChild) {
@@ -112,6 +112,9 @@ ipcRenderer.on('loadDataMessage', (event, data) => {
         });
 
     });
+    
+    $table.floatThead({scrollContainer:function(table){return $('#div_t')}, position:'fixed'});
+
     graphTop.updateOptions( { file: data.readings, series:data.series, labels:data.columns, dateWindow: null, valueRange: null } );
     graphBot.updateOptions( { file: data.readings, series:data.series, labels:data.columns, dateWindow: null, valueRange: null } );
 });
@@ -185,6 +188,7 @@ document.addEventListener('mouseup', function(e) {
 });
 */
 
+
 var lastRow = null;
 var highLightTimer = null;
 function highLightRow(x){
@@ -192,7 +196,6 @@ function highLightRow(x){
         var highLightRow = graphMap[x];
         var topPos = graphMap[x].offsetTop;
         var tableHeight = document.getElementById('div_t').clientHeight;
-        console.log(tableHeight);
         document.getElementById('div_t').scrollTop = topPos - (tableHeight/2);
         lastRow = graphMap[x];
         graphMap[x].classList.add("highLightedRow");
@@ -230,9 +233,9 @@ window.onload = function() {
                 interactionModel: Dygraph.defaultInteractionModel, // keeps drag-to-zoom even when the range selector is set.
                 highlightCallback: graphHighlight,
                 underlayCallback: drawLines,
+                drawCallback: drawCB,
             });
-
-     graphBot = new Dygraph(document.getElementById("div_gb"), graphData,
+    graphBot = new Dygraph(document.getElementById("div_gb"), graphData,
             {
                 drawPoints: false,
                 showRoller: false,
@@ -244,6 +247,7 @@ window.onload = function() {
                 interactionModel: Dygraph.defaultInteractionModel, // keeps drag-to-zoom even when the range selector is set.
                 highlightCallback: graphHighlight,
                 underlayCallback: drawLines,
+                drawCallback: drawCB,
             });
 
     sync = Dygraph.synchronize([graphTop, graphBot], {
@@ -252,40 +256,82 @@ window.onload = function() {
         range: false,
     });
 
-    // initialise the semantic dropdown controls.
-    $('.ui.dropdown').dropdown();
+    graphTop.limitBars = [120, 220]
+    graphBot.limitBars = [125, 225]
+    graphTop.graphName = "Top";
+    graphBot.graphName = "Bottom";
 
 };
 
+var savecontext = null;
 function drawLines(ctx, area, g) {
     
     if (typeof(g) == 'undefined') return;  // won't be set on the initial draw.
-
+    if (! g.limitBars) return;
     var range = g.xAxisRange();
-    var vals = [125,225];
-    for (var i = 0; i < vals.length; i++) {
-        if (!vals[i]) continue;
+    var c = Dygraph.toRGB_(g.getColors()[0]);
+    c.r = Math.floor(255 - 0.5 * (255 - c.r));
+    c.g = Math.floor(255 - 0.5 * (255 - c.g));
+    c.b = Math.floor(255 - 0.5 * (255 - c.b));
+    var color = 'rgb(' + c.r + ',' + c.g + ',' + c.b + ')';
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.0;
+    for (var i = 0; i < g.limitBars.length; i++) {
         var x1 = range[0];
-        var y1 = vals[i];
+        var y1 = g.limitBars[i];
         var x2 = range[1];
-        var y2 = vals[i];
+        var y2 = g.limitBars[i];
 
         var p1 = g.toDomCoords(x1, y1);
         var p2 = g.toDomCoords(x2, y2);
 
-        var c = Dygraph.toRGB_(g.getColors()[0]);
-        c.r = Math.floor(255 - 0.5 * (255 - c.r));
-        c.g = Math.floor(255 - 0.5 * (255 - c.g));
-        c.b = Math.floor(255 - 0.5 * (255 - c.b));
-        var color = 'rgb(' + c.r + ',' + c.g + ',' + c.b + ')';
-        ctx.save();
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 1.0;
         ctx.beginPath();
         ctx.moveTo(p1[0], p1[1]);
         ctx.lineTo(p2[0], p2[1]);
         ctx.closePath();
         ctx.stroke();
-        ctx.restore();
     }
+    ctx.restore();
+}
+
+function drawCB(graph) {
+
+    if (! graph.limitBars) return;
+
+
+    var area = graph.getArea();
+    var ctx = graph.hidden_ctx_;
+    ctx.fillText(graph.graphName, 100, 50);
+
+
+    var c = Dygraph.toRGB_(graph.getColors()[0]);
+    c.r = Math.floor(255 - 0.5 * (255 - c.r));
+    c.g = Math.floor(255 - 0.5 * (255 - c.g));
+    c.b = Math.floor(255 - 0.5 * (255 - c.b));
+    var color = 'rgb(' + c.r + ',' + c.g + ',' + c.b + ')';
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.0;
+    ctx.font = '18px sans-serif';
+
+    for(var i = 0; i < graph.limitBars.length; i++){
+
+        var text = graph.limitBars[i].toFixed(1);
+        var pos = graph.toDomCoords(graph.xAxisRange()[0], graph.limitBars[i]);
+        var textarea = {x: pos[0] + 30, y: pos[1] - 10, width:50, height: 20};
+        var points = [[textarea.x, textarea.y], [textarea.x,  textarea.y + textarea.height], [textarea.x + textarea.width, textarea.y + textarea.height], [textarea.x + textarea.width, textarea.y]];
+        ctx.clearRect(textarea.x, textarea.y, textarea.width, textarea.height);
+        ctx.beginPath();
+        ctx.moveTo(points[0][0], points[0][1]);
+        for (var j = 1; j<points.length; j++){
+            ctx.lineTo(points[j][0], points[j][1]);
+        }
+        ctx.closePath();
+        ctx.stroke();
+
+        ctx.fillText(text, textarea.x + 3, textarea.y + textarea.height - 3);
+
+    }
+    ctx.restore();
 }

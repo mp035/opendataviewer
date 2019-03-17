@@ -1,4 +1,4 @@
-# Linux Software for Hantek 365B Datalogger
+# Open Data Viewer
 This repository hosts an aplication for viewing the data recorded by electrical data loggers.
 
 ## How to build (Tested on Ubuntu 16.04LTS)

@@ -87,7 +87,7 @@ document.getElementById('fileOpenElem').addEventListener('change', function(evt)
     document.getElementById("div_gb").style.display="none";
     document.getElementById("mainLoader").style.display="block";
     var file = this.files[0];
-    setTimeout(function(){processChtFile(file, displayChartData);}, 10);
+    setTimeout(function(){processChtFile(file, displayChartData);}, 100);
     document.getElementById('fileOpenElem').value = "";
     
 });
@@ -335,6 +335,7 @@ var interactionModel = {
             textBox.style.top = textArea.y + "px";
             textBox.style.left = textArea.x + "px";
             textBox.style.width = textArea.width + "px";
+            textBox.style.height = textArea.height + "px";
             textBox.value =  g.limitBars[g.editingLimitBars].toFixed(1);
             g.graphDiv.appendChild(textBox);
             textBox.addEventListener('keypress', (evt)=>{limitInputKeyPressHandler(evt, g);});

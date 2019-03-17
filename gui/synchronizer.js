@@ -36,11 +36,11 @@
 'use strict';
 
 var Dygraph;
-if (window.Dygraph) {
+//if (window.Dygraph) {
   Dygraph = window.Dygraph;
-} else if (typeof(module) !== 'undefined') {
-  Dygraph = require('../dygraph');
-}
+//} else if (typeof(module) !== 'undefined') {
+//  Dygraph = require('../dygraph');
+//}
 
 var synchronize = function(/* dygraphs..., opts */) {
   if (arguments.length === 0) {
@@ -169,33 +169,38 @@ function attachZoomHandlers(gs, syncOpts, prevCallbacks) {
     var g = gs[i];
     g.updateOptions({
       drawCallback: function(me, initial) {
-        if (block || initial) return;
+        if (block || initial) {
+          // call the users drawCallback even if we are blocked
+          for (var j = 0; j < gs.length; j++) {
+            if (gs[j] == me && prevCallbacks[j] && prevCallbacks[j].drawCallback) {
+              prevCallbacks[j].drawCallback.apply(gs[j], [gs[j]]);
+            }
+          }
+          return;
+        }
+        
         block = true;
         var opts = {
           dateWindow: me.xAxisRange()
         };
         if (syncOpts.range) opts.valueRange = me.yAxisRange();
 
-          for (var j = 0; j < gs.length; j++) {
-              if (gs[j] == me) {
-                  if (prevCallbacks[j] && prevCallbacks[j].drawCallback) {
-                      prevCallbacks[j].drawCallback.apply(this, arguments);
-                  }
-                  continue;
-              }
-
-              // Only redraw if there are new options
-              if (arraysAreEqual(opts.dateWindow, gs[j].getOption('dateWindow')) && 
-                  arraysAreEqual(opts.valueRange, gs[j].getOption('valueRange'))) {
-                  continue;
-              }
-              gs[j].updateOptions(opts);
-              if (prevCallbacks[j] && prevCallbacks[j].drawCallback) {
-                  prevCallbacks[j].drawCallback.apply(gs[j], [gs[j]]);
-              }
-
-
+        for (var j = 0; j < gs.length; j++) {
+          if (gs[j] == me) {
+            if (prevCallbacks[j] && prevCallbacks[j].drawCallback) {
+              prevCallbacks[j].drawCallback.apply(this, arguments);
+            }
+            continue;
           }
+
+          // Only redraw if there are new options
+          if (arraysAreEqual(opts.dateWindow, gs[j].getOption('dateWindow')) && 
+              arraysAreEqual(opts.valueRange, gs[j].getOption('valueRange'))) {
+            continue;
+          }
+
+          gs[j].updateOptions(opts);
+        }
         block = false;
       }
     }, true /* no need to redraw */);

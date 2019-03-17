@@ -6,26 +6,11 @@
     <meta content="width=device-width, initial-scale=1, maximum-scale=2, user-scalable=no" name="viewport" />
     <meta content="#ffffff" name="theme-color" />
     <meta http-equiv="X-UA-Compatible" content="IE=10; IE=9; IE=8; IE=7; IE=EDGE" />
-    <title>OpenLogger</title>
+    <title>Open Data Viewer</title>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.min.css" />
     <link href="./css/fontello/assets/css/fontello.css" rel="stylesheet" type="text/css" />
     <link href="./css/main.css" rel="stylesheet" type="text/css" />
-    <script>
-        window.nodeRequire = require;
-        delete window.require;
-        delete window.exports;
-        delete window.module;
-    </script>
- 
-    <!-- Bootstrap Optional JavaScript -->
-    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <script>
-        let $ = nodeRequire('jquery');
-        nodeRequire('bootstrap');
-        nodeRequire('floatthead');
-    </script>
-
     <link rel="stylesheet" type="text/css" href="./node_modules/dygraphs/dist/dygraph.css">
 </head>
 <body>
@@ -45,7 +30,7 @@
                         <a class="dropdown-item" href="#">Overlay Another Chart</a>
                         <a class="dropdown-item" href="#">Save</a>
                         <a class="dropdown-item" href="#">Save As</a>
-                        <a class="dropdown-item" href="#">Close</a>
+                        <a class="dropdown-item" id="menuFileClose"href="#">Close</a>
                     </div>
                 </li>
                 <li class="nav-item dropdown appmenu">
@@ -76,7 +61,7 @@
                         Comments
                     </a>
                     <div class="dropdown-menu px-1 py-1" aria-labelledby="dropdownCommentsMenuButton">
-                        <textarea class="form-control" rows="3" style="width:480px"></textarea>
+                        <textarea id="commentsTextArea" class="form-control" rows="3" style="width:480px"></textarea>
                     </div>          
                 </li> 
                 <li class="nav-item dropdown appmenu">
@@ -96,7 +81,10 @@
         </div>
     </nav>
 
-
+    <div id="mainLoader">
+    <div class="loader"></div>
+    <h3>Loading...</h3>
+    </div>
 
     <!-- Position of graph is absolute. -->
     <div id="div_g" class="graphWrapper">
@@ -126,21 +114,13 @@
     <div id="div_f">
         <div class="ui divider"></div>
         <footer>
-            Datalogger Interface Software written by Mark Pointing. &copy; 2018 FuturePoint Systems <a href="futurepoint.com.au">www.futurepoint.com.au</a>
+            Datalogger Interface Software written by Mark Pointing. &copy; 2018 FuturePoint Systems <a href="#">www.futurepoint.com.au</a>
         </footer>
     </div>
 
+    <input type="file" id="fileOpenElem" accept=".cht, .log" style="display:none">
 
-
-    </div>
-    <script>
-
-        var Dygraph = nodeRequire('dygraphs');
-//nodeRequire("./node_modules/dygraphs/src/extras/synchronizer.js");
-nodeRequire("./synchronizer.js"); // the original synchronizer is a bit broken. This one is fixed.
-// You can also require other files to run in this process
-nodeRequire('./renderer.js')
-    </script>
+    <script src="browserified.js"></script>
 
 </body>
 </html>

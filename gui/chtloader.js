@@ -9,12 +9,9 @@
             var reader = new FileReader();
 
             reader.onload = function(e) {
-                console.log("File selected.");
                 // Read File Asynchrously
                 var content = reader.result;
-                //console.log(content);
                 var chtArray = content.split(",");
-                //console.log(chtArray);
 
                 // sometimes the comments in the chart files contain commas,
                 // so they appear to span multiple slots in the file.  
@@ -26,9 +23,7 @@
                 for (var i = chtArray.length-1; i >= 0; i--){
                     // convert numeric array items to numbers and
                     // find the end of the chart data.      
-                    //console.log(i, ": ", chtArray[i]);
                     if (chtArray[i].includes("/")) {
-                        console.log("dateIndex: ", i);
                         dateIndex = i;
                         break
                     } 
@@ -40,7 +35,6 @@
                             dataEnd = dataEnd + 1;
                             if (dataEnd == 0) {
                                 dataEnd = i;
-                                console.log("dataEnd " , i);
                             }   
                         }
                     } 
@@ -49,11 +43,9 @@
 
                 // trim the chart array to valid data only
                 chtArray = chtArray.slice(0,dataEnd);
-                //console.log ("Length ", chtArray.length)
 
                 var commentsArray = chtArray.slice(0,dateIndex);
                 var comments = commentsArray.join(",").replace(/^"(.*)"$/, "$1"); 
-                // console.log("Comments: ", comments)
 
                 var dateStr = chtArray[dateIndex].replace(/"/g, "");
                 var dateArray = dateStr.split(" ");
@@ -192,7 +184,7 @@
                         startTime = new Date(startTime.getTime() + 60000);
                     }    
 
-                    var data = {readings:readings, comments:comments, columns:columns, series:series};
+                    var data = {readings:readings, comments:comments, columns:columns, series:series, filename:file.name, filepath:file.path};
                 }
                 
                 outputFunc(data);
@@ -204,6 +196,26 @@
 
     }
 
+    function processJlgFile(file, outputFunc){
+
+        if (file === undefined){
+            console.log("You didn't load the file");
+            return;
+        } else {
+            var reader = new FileReader();
+
+            reader.onload = function(e) {
+                // Read File Asynchrously
+                var content = reader.result;
+                var data = JSON.parse(pako.inflate(content, { to: 'string' }));
+                outputFunc(data);
+            }
+        }
+        //reader.readAsBinaryString(file)
+        reader.readAsText(file)
+    }
+
     window.processChtFile = processChtFile;
+    window.processJlgFile = processJlgFile;
 
 })();

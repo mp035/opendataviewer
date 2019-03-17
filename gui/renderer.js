@@ -10,14 +10,16 @@ let $ = require('jquery');
 window.Dygraph = require('dygraphs');
 //require("./node_modules/dygraphs/src/extras/synchronizer.js");
 require("./synchronizer.js"); // the original synchronizer is a bit broken. This one is fixed.
+window.pako = require('pako');
 require("./chtloader.js");
-        
+var fileDownload = require('js-file-download');
+
 // keep readings global so that
 // we can access them in timer based routines.
 var readingTotal = 0.0;
 var readingCount = 0;
 var readingUnit = "";
-var graphData = [[new Date(), 0]];
+var graphData = {readings:[[new Date(), 0]]};
 var graphTop;
 var graphBot;
 var readingInterval = 1;
@@ -27,9 +29,9 @@ var graphMap = {};
 
 // assign an event to the clear button
 document.getElementById("menuFileClose").addEventListener('click',()=>{
-    graphData = [];
-    graphTop.updateOptions( { 'file': graphData } );
-    graphBot.updateOptions( { 'file': graphData } );
+    graphData = {readings:[[new Date(), 0]]};
+    graphTop.updateOptions( { 'file': graphData.readings } );
+    graphBot.updateOptions( { 'file': graphData.readings } );
     var tableBody = document.getElementById("bodyTableReadings");
     tableBody.innerHTML = "";
 });
@@ -73,8 +75,6 @@ document.getElementById('menuFileOpen').addEventListener('click', function(evt){
     if (fileElem) {
         fileElem.click();
     }
-    return;
-    //ipcRenderer.send('openFileMessage');
 });
 
 
@@ -87,12 +87,25 @@ document.getElementById('fileOpenElem').addEventListener('change', function(evt)
     document.getElementById("div_gb").style.display="none";
     document.getElementById("mainLoader").style.display="block";
     var file = this.files[0];
-    setTimeout(function(){processChtFile(file, displayChartData);}, 100);
+    if (file.name.toLowerCase().endsWith(".cht")){
+        setTimeout(function(){processChtFile(file, displayChartData);}, 100);
+    } else if (file.name.toLowerCase().endsWith(".jlg")){
+        setTimeout(function(){processJlgFile(file, displayChartData);}, 100);
+    } else {
+        document.getElementById("div_t").style.display="block";
+        document.getElementById("div_gt").style.display="block";
+        document.getElementById("div_gb").style.display="block";
+        document.getElementById("mainLoader").style.display="none";
+        alert("Unable to determine file type!");
+    }
+
     document.getElementById('fileOpenElem').value = "";
     
 });
 
 function displayChartData(data){
+
+    graphData = data; // keep a global handle for saving of data.
 
     document.getElementById("commentsTextArea").value = data.comments;
 
@@ -144,6 +157,14 @@ function displayChartData(data){
     graphBot.updateOptions( { file: data.readings, series:data.series, labels:data.columns, dateWindow: null, valueRange: null } );
     document.getElementById("mainLoader").style.display="none";
 }
+
+// trigger the file load operation
+document.getElementById('menuFileSave').addEventListener('click', function(evt){
+    var filename = graphData.filename.replace(".cht", ".jlg");
+    filename = filename.replace(".CHT", ".jlg");
+    var binaryString = pako.deflate(JSON.stringify(graphData), { to: 'string' });
+    fileDownload(binaryString, filename);
+});
 
 /*
 // handle dragbar between graphs.
@@ -387,7 +408,7 @@ var interactionModel = {
 
     window.onload = function() {
 
-        graphTop = new Dygraph(document.getElementById("div_gt"), graphData,
+        graphTop = new Dygraph(document.getElementById("div_gt"), graphData.readings,
             {
                 drawPoints: false,
                 showRoller: false,
@@ -402,7 +423,7 @@ var interactionModel = {
                 underlayCallback: drawLines,
                 drawCallback: drawLimitTextBox,
             });
-        graphBot = new Dygraph(document.getElementById("div_gb"), graphData,
+        graphBot = new Dygraph(document.getElementById("div_gb"), graphData.readings,
             {
                 drawPoints: false,
                 showRoller: false,

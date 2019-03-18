@@ -27,9 +27,7 @@
                     </a>
                     <div class="dropdown-menu" aria-labelledby="dropdownFileMenuButton">
                         <a class="dropdown-item" id="menuFileOpen" href="#">Open</a>
-                        <a class="dropdown-item" href="#">Overlay Another Chart</a>
-                        <a class="dropdown-item" id="menuFileSave" href="#">Save</a>
-                        <a class="dropdown-item" href="#">Save As</a>
+                        <a class="dropdown-item" id="menuFileSave" href="#">Save (As)</a>
                         <a class="dropdown-item" id="menuFileClose"href="#">Close</a>
                     </div>
                 </li>
@@ -51,9 +49,9 @@
                         Table View
                     </a>
                     <div class="dropdown-menu" aria-labelledby="dropdownTableMenuButton">
-                        <a class="dropdown-item view-period" href="#" data-value="4">All Readings</a>
-                        <a class="dropdown-item view-period" href="#" data-value="6">Max/Min</a>
-                        <a class="dropdown-item view-period" href="#" data-value="8">Hide Table</a>
+                        <a class="dropdown-item" id="menuTableAll" href="#" data-value="4">All Readings</a>
+                        <a class="dropdown-item" id="menuTableMaxMin" href="#" data-value="6">Max/Min</a>
+                        <a class="dropdown-item" id="menuTableHide" href="#" data-value="8">Hide Table</a>
                     </div>          
                 </li> 
                 <li class="nav-item dropdown appmenu">
@@ -73,15 +71,16 @@
                         <a class="dropdown-item view-period" href="#" data-value="6">Table</a>
                     </div>          
                 </li> 
-                <li class="nav-item">
+                <!--li class="nav-item">
                     <a class="nav-link appmenu icon-help-circled" href="#">Help</a>
-                </li>
+                </li-->
             </ul>
 
         </div>
     </nav>
 
-    <div id="mainLoader">
+    <!-- a loader for the whole page. -->
+    <div id="mainLoader" class="loaderContainer">
     <div class="loader"></div>
     <h3>Loading...</h3>
     </div>
@@ -96,6 +95,24 @@
 
     <!-- Position of table is absolute. -->
     <div id="div_t" class="wrapper">
+
+        <!-- a loader specifically for the table. -->
+        <div id="tableLoader" class="loaderContainer">
+            <div class="loader"></div>
+            <h3>Loading...</h3>
+        </div>
+
+        <table id="tableDailyMaxMin" class="table table-sm table-bordered" style="display:none">
+            <thead>
+                <tr id="headTableMaxMin">
+                    <th>Date</th>
+                    <th>Reading</th>
+                </tr>
+            </thead>
+            <tbody id="bodyTableMaxMin">
+            </tbody>
+        </table>
+
         <table id="tableReadings" class="table table-sm table-bordered">
             <thead>
                 <tr id="headTableReadings">
@@ -107,6 +124,8 @@
             </tbody>
 
         </table>
+
+        
     </div>
 
 

@@ -20,6 +20,7 @@
     "electron": "^4.0.8"
   },
   "dependencies": {
+    "array.prototype.fill": "^1.0.2",
     "bootstrap": "^4.3.1",
     "dygraphs": "^2.1.0",
     "floatthead": "^2.1.3",

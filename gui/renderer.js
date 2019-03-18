@@ -13,6 +13,7 @@ require("./synchronizer.js"); // the original synchronizer is a bit broken. This
 window.pako = require('pako');
 require("./chtloader.js");
 var fileDownload = require('js-file-download');
+require('array.prototype.fill');
 
 // keep readings global so that
 // we can access them in timer based routines.
@@ -26,6 +27,15 @@ var readingInterval = 1;
 var readingIntervalCount = 0;
 var graphMap = {};
 
+var shortDayNames = new Array(7);
+shortDayNames[0] =  "Sun";
+shortDayNames[1] = "Mon";
+shortDayNames[2] = "Tue";
+shortDayNames[3] = "Wed";
+shortDayNames[4] = "Thu";
+shortDayNames[5] = "Fri";
+shortDayNames[6] = "Sat";
+
 
 // assign an event to the clear button
 document.getElementById("menuFileClose").addEventListener('click',()=>{
@@ -34,6 +44,48 @@ document.getElementById("menuFileClose").addEventListener('click',()=>{
     graphBot.updateOptions( { 'file': graphData.readings } );
     var tableBody = document.getElementById("bodyTableReadings");
     tableBody.innerHTML = "";
+});
+
+// assign an event to the table hide button
+
+document.getElementById("menuTableHide").addEventListener('click',()=>{
+    // this is a bit slow, so do it after the menu closes
+    setTimeout(function(){
+        destroyTableHeader();
+        document.getElementById("div_t").style.visibility="hidden";
+        document.getElementById("div_g").style.right="15px";
+        graphTop.resize();
+        graphBot.resize();
+    }, 10);
+});
+
+var div_g_style_right = document.getElementById("div_g").style.right;
+function showHideTable(show, hide){
+    destroyTableHeader(); 
+    // this event is slow, so do it after the click menu closes.
+    var tableShow = document.getElementById(show);
+    var tableHide = document.getElementById(hide);
+    var loader = document.getElementById('tableLoader');
+    document.getElementById("div_t").style.visibility="visible";
+    document.getElementById("div_g").style.right=div_g_style_right;
+    tableHide.style.display="none";
+    tableShow.style.display="none";
+    loader.style.display="block"
+    graphTop.resize();
+    graphBot.resize();
+
+    setTimeout(function(){
+        tableShow.style.display="table";
+        loader.style.display="none"
+        setupTableHeader();
+    }, 10);
+}
+document.getElementById("menuTableAll").addEventListener('click',()=>{
+    showHideTable('tableReadings', 'tableDailyMaxMin');
+});
+
+document.getElementById("menuTableMaxMin").addEventListener('click',()=>{
+    showHideTable('tableDailyMaxMin', 'tableReadings');
 });
 
 /*
@@ -103,45 +155,114 @@ document.getElementById('fileOpenElem').addEventListener('change', function(evt)
     
 });
 
+function destroyTableHeader(){
+    var tableDiv = document.getElementById("div_t");
+    tableDiv.style.display="block";
+    tableDiv.scrollTop = 0;
+    var $table = $('#tableReadings');
+    console.log($table.css('display'));
+    if ($table.css('display') == "none") {
+        console.log('none');
+        $table = $('#tableDailyMaxMin');
+    }
+    $table.floatThead('destroy');
+}
+function setupTableHeader(){
+    var $table = $('#tableReadings');
+    if ($table.css('display') == "none") $table = $('#tableDailyMaxMin');
+    $table.floatThead({scrollContainer:function(table){return $('#div_t')}, position:'fixed'});
+}
+
 function displayChartData(data){
 
     graphData = data; // keep a global handle for saving of data.
 
     document.getElementById("commentsTextArea").value = data.comments;
-
-    var tableDiv = document.getElementById("div_t");
-    tableDiv.style.display="block";
-    tableDiv.scrollTop = 0;
-    var $table = $('#tableReadings');
-    $table.floatThead('destroy');
+    destroyTableHeader();
+    
     var tableHead = document.getElementById("headTableReadings");
     var tableBody = document.getElementById("bodyTableReadings");
+    var maxMinHead = document.getElementById("headTableMaxMin");
+    var maxMinBody = document.getElementById("bodyTableMaxMin");
     while (tableHead.firstChild) {
         tableHead.removeChild(tableHead.firstChild);
     }
     while (tableBody.firstChild) {
         tableBody.removeChild(tableBody.firstChild);
     }
-    
+    while (maxMinHead.firstChild) {
+        maxMinHead.removeChild(maxMinHead.firstChild);
+    }
+    while (maxMinBody.firstChild) {
+        maxMinBody.removeChild(maxMinBody.firstChild);
+    } 
+
     data.columns.forEach(function (column){
         var th = document.createElement('th');
         th.innerHTML = column;
         tableHead.appendChild(th);
+        th = th.cloneNode(true);
+        maxMinHead.appendChild(th);
     });
 
     graphMap = {}
+    var currentDate = null
+    var dailyMax = new Array(data.readings[0].length);
+    var dailyMin = new Array(data.readings[0].length);
+    var dailyMaxDates = new Array(data.readings[0].length);
+    var dailyMinDates = new Array(data.readings[0].length);
+    dailyMin.fill(Number.MAX_SAFE_INTEGER);
+    dailyMax.fill(Number.MIN_SAFE_INTEGER);
     data.readings.forEach(function(reading){
-
         var graphRow = "";
         var row = tableBody.insertRow(-1);
         var dateTime = row.insertCell(-1);
         reading[0] = new Date(reading[0]);
+        var readingDate = new Date(
+            reading[0].getFullYear(),reading[0].getMonth() , reading[0].getDate());
+        if (!currentDate || (currentDate.getTime() != readingDate.getTime())){
+            if (currentDate){
+                var maxRow = maxMinBody.insertRow(-1);
+                var minRow = maxMinBody.insertRow(-1);
+                var maxDate = maxRow.insertCell(-1);
+                var minDate = minRow.insertCell(-1);
+                maxDate.innerHTML = shortDayNames[currentDate.getDay()] + " " + currentDate.toLocaleDateString() + " Max";
+                minDate.innerHTML = shortDayNames[currentDate.getDay()] + " " + currentDate.toLocaleDateString() + " Min";
+                dailyMax.forEach(function(value, index){
+                    if (index > 0){
+                        var maxCell = maxRow.insertCell(-1);
+                        if (value > Number.MIN_SAFE_INTEGER){
+                            maxCell.innerHTML = value;
+                        }
+                    }
+                });
+                dailyMin.forEach(function(value, index){
+                    if (index > 0){
+                        var minCell = minRow.insertCell(-1);
+                        if (value < Number.MAX_SAFE_INTEGER){
+                            minCell.innerHTML = value;
+                        }
+                    }
+                });
+            }
+            currentDate = readingDate;
+            dailyMin.fill(Number.MAX_SAFE_INTEGER);
+            dailyMax.fill(Number.MIN_SAFE_INTEGER);
+        }
         dateTime.innerHTML = reading[0].toLocaleString();
 
         graphMap[reading[0].getTime()] = row;
 
         reading.forEach(function(value, index){
             if (index > 0){
+                if(value > dailyMax[index]){
+                    dailyMax[index] = value;
+                    dailyMaxDates[index] = reading[0];
+                }
+                if(value < dailyMin[index]){
+                    dailyMin[index] = value;
+                    dailyMinDates[index] = reading[0];
+                }
                 var cell = row.insertCell(-1);
                 cell.innerHTML = value;
             }
@@ -149,7 +270,7 @@ function displayChartData(data){
 
     });
     
-    $table.floatThead({scrollContainer:function(table){return $('#div_t')}, position:'fixed'});
+    setupTableHeader();
 
     document.getElementById("div_gt").style.display="block";
     graphTop.updateOptions( { file: data.readings, series:data.series, labels:data.columns, dateWindow: null, valueRange: null } );

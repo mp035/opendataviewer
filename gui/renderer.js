@@ -143,6 +143,8 @@ document.getElementById('fileOpenElem').addEventListener('change', function(evt)
         setTimeout(function(){processChtFile(file, displayChartData);}, 100);
     } else if (file.name.toLowerCase().endsWith(".jlg")){
         setTimeout(function(){processJlgFile(file, displayChartData);}, 100);
+    } else if (file.name.toLowerCase().endsWith(".log")){
+        setTimeout(function(){processLogFile(file, displayChartData);}, 100);
     } else {
         document.getElementById("div_t").style.display="block";
         document.getElementById("div_gt").style.display="block";

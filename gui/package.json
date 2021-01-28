@@ -17,7 +17,7 @@
   "author": "Mark Pointing",
   "license": "GPL v3",
   "devDependencies": {
-    "electron": "^4.0.8"
+    "electron": "^9.4.0"
   },
   "dependencies": {
     "array.prototype.fill": "^1.0.2",
